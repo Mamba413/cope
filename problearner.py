@@ -253,6 +253,9 @@ class PALearner():
             self.rbf_dim = grid_search.best_params_['rbf__n_components']
             if self.verbose:
                 print("Optimal RBF feature of PALearner:", self.rbf_dim)
+            pass
+        if self.rbf_dim == "raw":
+            self.rbf_dim = state.shape[1]
 
         self.rbf_feature = RBFSampler(gamma=1, random_state=1, n_components=self.rbf_dim)
 
