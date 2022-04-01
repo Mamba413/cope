@@ -57,7 +57,7 @@ opeuc_truth = 1.8934765607096165  ## dimension: 3
 # opeuc_truth = 2.3456954159828456  # dimension: 5
 # logging.info("Truth: {0}".format(opeuc_truth))
 
-sim_rep = 100
+sim_rep = 400
 num_time = 20
 num_trajectory_list = [20, 40, 80, 160, 320]
 # num_trajectory_list = [320, 640]

@@ -25,11 +25,11 @@ wm_ratiolearner_setting={'mode':'linear', 'rbf_ndims': [10], 'batch_size':32, 'e
 opeuc_truth = 1.4498987620607517
 
 gamma = 0.9
-sim_rep = 100
+sim_rep = 400
 
 # num_time_list = [60, 100, 140, 180, 220]
 num_time_list = [20, 40, 80, 160, 320]
-num_trajectory = 20
+num_trajectory = 80
 seed_list = list(range(sim_rep))
 num_time_list_size = len(num_time_list)
 

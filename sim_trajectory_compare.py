@@ -37,8 +37,9 @@ wm_ratiolearner_setting = {'mode': 'linear', 'rbf_ndims': [10], 'batch_size': 32
 opeuc_truth = 1.4498987620607517
 # logging.info("Truth: {0}".format(opeuc_truth))
 
-sim_rep = 100
+sim_rep = 400
 # num_trajectory_list = [60, 100, 140, 180, 220]
+# num_trajectory_list = [20, 40, 80, 160, 320]
 num_trajectory_list = [20, 40, 80, 160, 320]
 num_time = 20
 seed_list = list(range(sim_rep))
