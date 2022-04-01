@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from problearner import PMLearner, PALearner
 from numpy.linalg import inv
 from sklearn.kernel_approximation import RBFSampler
 
@@ -71,7 +70,7 @@ class RatioLinearLearner:
     res = np.vstack([dim_list, res_list])
     res.transpose()
     '''
-    def __init__(self, dataset, policy, cplearner, time_difference=None, gamma=0.9, ndim=100, l2penalty=1.0, use_mediator=True):
+    def __init__(self, dataset, policy, cplearner, time_difference=None, gamma=0.9, ndim=100, l2penalty=1.0, use_mediator=True, truncate=20):
         self.use_mediator = use_mediator
 
         self.state = np.copy(dataset['state'])
@@ -94,6 +93,7 @@ class RatioLinearLearner:
         self.beta = None
         self.rbf_feature = RBFSampler(random_state=1, n_components=ndim)
         self.rbf_feature.fit(np.vstack((self.state, self.s0)))
+        self.truncate = truncate
         pass
 
     def feature_engineering(self, feature):
@@ -124,7 +124,8 @@ class RatioLinearLearner:
                 # print(pm_ratio.shape)
                 # print(policy_action_tmp.flatten().shape)
                 # print(ratio.shape)
-                ratio += (pm_ratio * policy_action_tmp.flatten()).reshape(-1, 1)
+                # ratio += (pm_ratio * policy_action_tmp.flatten()).reshape(-1, 1)
+                ratio += (pm_ratio * target_pa.flatten()).reshape(-1, 1)
             ratio = ratio.flatten()
             ## deterministic policy:
             # self.policy_action = np.array([self.policy(state_value)[0] for state_value in self.state])
@@ -166,7 +167,7 @@ class RatioLinearLearner:
         psi_minus_psi_next = psi - psi_next
         return psi_minus_psi_next
 
-    def get_ratio_prediction(self, state, truncate=20, normalize=True):
+    def get_ratio_prediction(self, state, normalize=True):
         '''
         Input:
         state: a numpy.array
@@ -179,8 +180,8 @@ class RatioLinearLearner:
             x_state = np.copy(state)
         psi = self.feature_engineering(x_state)
         ratio = np.matmul(psi, self.beta).flatten()
-        ratio_min = 1 / truncate
-        ratio_max = truncate
+        ratio_min = 1 / self.truncate
+        ratio_max = self.truncate
         ratio = np.clip(ratio, a_min=ratio_min, a_max=ratio_max)
         if state.shape[0] > 1:
             if normalize:
@@ -192,8 +193,8 @@ class RatioLinearLearner:
         mean_psi_s0 = (1 - self.gamma) * np.mean(psi_s0, axis=0)
         return mean_psi_s0
 
-    def get_r_prediction(self, state, truncate=20, normalize=True):
-        return self.get_ratio_prediction(state, truncate, normalize)
+    def get_r_prediction(self, state, normalize=True):
+        return self.get_ratio_prediction(state, normalize)
 
     def goodness_of_fit(self, target_policy, new_s0, new_state, new_action, new_mediator, new_reward, new_next_state):
         np.random.seed(1)
