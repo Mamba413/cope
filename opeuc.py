@@ -4,8 +4,9 @@ import numpy as np
 from problearner import PMLearner, PALearner
 from qlearner import Qlearner
 from rll import RatioLinearLearner
+from rnnl import RatioRKHSLearner, train
 from sklearn.model_selection import KFold
-
+import tensorflow as tf
 
 class OPEUC:
     def __init__(self, dataset,
@@ -510,13 +511,15 @@ def nuisance_estimate_uc(s0, iid_dataset, target_policy, time_difference, gamma,
                 iid_dataset_train = [iid_dataset[0][train_index], iid_dataset[1][train_index],
                                      iid_dataset[2][train_index], iid_dataset[3][train_index],
                                      iid_dataset[4][train_index]]
+                train_time_difference = time_difference[train_index]
                 new_state, new_action, new_mediator, new_reward, new_next_state = iid_dataset[0][test_index], iid_dataset[
                     1][test_index], iid_dataset[2][test_index], iid_dataset[3][test_index], iid_dataset[4][test_index]
                 qlearner = Qlearner(iid_dataset_train, target_policy, pmlearner,
-                                    palearner, time_difference=time_difference, 
+                                    palearner, time_difference=train_time_difference, 
                                     gamma=gamma, epoch=epoch, verbose=verbose,
                                     model=model, rbf_dim=rbf_dim_value, eps=eps)
                 qlearner.fit()
+                qlearner.time_difference = time_difference[test_index]
                 rmse_arr[index] += qlearner.goodness_of_fit(
                     target_policy, new_state, new_action, new_mediator, new_reward, new_next_state)
                 pass
@@ -538,8 +541,11 @@ def nuisance_estimate_uc(s0, iid_dataset, target_policy, time_difference, gamma,
     ## Train Ratio estimator:
     ratio_rbf_dim = ratiolearner_setting['rbf_ndims']
     rlearner_type = ratiolearner_setting['mode']
+    if 'truncate' in ratiolearner_setting.keys():
+        truncate = ratiolearner_setting['truncate']
+    else:
+        truncate = 20
     prespecific_rbf_dim_candidate = type(ratio_rbf_dim) is list and len(ratio_rbf_dim) > 1
-    rlearner_type = 'linear'
     if rlearner_type == 'linear':
         if ratio_rbf_dim is None or prespecific_rbf_dim_candidate:
             nfold = 5
@@ -562,14 +568,14 @@ def nuisance_estimate_uc(s0, iid_dataset, target_policy, time_difference, gamma,
                     s0_test_index = index_s0[1]
                     dataset_train = {'s0': s0[s0_train_index], 'state': iid_dataset[0][train_index], "next_state": iid_dataset[4][train_index],
                                      'action': iid_dataset[1][train_index], 'mediator': iid_dataset[2][train_index]}
-                    rationearner = RatioLinearLearner(dataset_train, target_policy, pmlearner, 
+                    ratiolearner = RatioLinearLearner(dataset_train, target_policy, pmlearner, 
                                                       time_difference=time_difference, gamma=gamma, 
-                                                      ndim=rbf_dim_value)
-                    rationearner.fit()
+                                                      ndim=rbf_dim_value, truncate=truncate)
+                    ratiolearner.fit()
 
                     new_s0, new_state, new_action, new_mediator, new_reward, new_next_state = s0[s0_test_index], iid_dataset[0][test_index], iid_dataset[
                         1][test_index], iid_dataset[2][test_index], iid_dataset[3][test_index], iid_dataset[4][test_index]
-                    rmse_arr[index] += rationearner.goodness_of_fit(
+                    rmse_arr[index] += ratiolearner.goodness_of_fit(
                         target_policy, new_s0, new_state, new_action, new_mediator, new_reward, new_next_state)
                     pass
                 pass
@@ -584,16 +590,29 @@ def nuisance_estimate_uc(s0, iid_dataset, target_policy, time_difference, gamma,
 
         dataset = {'s0': s0, 'state': iid_dataset[0],
                    "next_state": iid_dataset[4], 'action': iid_dataset[1], 'mediator': iid_dataset[2]}
-        rationearner = RatioLinearLearner(dataset, target_policy, pmlearner, 
+        ratiolearner = RatioLinearLearner(dataset, target_policy, pmlearner, 
                                           time_difference=time_difference, gamma=gamma, 
-                                          ndim=ratio_rbf_dim)
-        rationearner.fit()
-        # rll_prediction = rationearner.get_ratio_prediction(iid_dataset[0])
+                                          ndim=ratio_rbf_dim, truncate=truncate)
+        ratiolearner.fit()
+        # rll_prediction = ratiolearner.get_ratio_prediction(iid_dataset[0])
         # print("RLL prediction: ", (np.quantile(
         #     rll_prediction, q=np.array([0.0, 0.25, 0.5, 0.75, 1.0])), np.mean(rll_prediction)))
+    elif rlearner_type == 'ANN':
+        if ratio_rbf_dim is None or prespecific_rbf_dim_candidate:
+            ratio_rbf_dim = 10
+        elif type(ratio_rbf_dim) is list:
+            ratio_rbf_dim = ratio_rbf_dim[0]
+        else:
+            pass
+
+        dataset = {'s0': s0, 'state': iid_dataset[0], "next_state": iid_dataset[4], 'action': iid_dataset[1], 'mediator': iid_dataset[2]}
+        ratiolearner = RatioRKHSLearner(hidden_node=ratio_rbf_dim, truncate=truncate)
+        lr = 1e-3
+        optimizer = tf.keras.optimizers.Adam(learning_rate=lr)
+        train(ratiolearner, optimizer, dataset, target_policy, pmlearner, gamma=gamma)
         pass
 
-    return qlearner, rationearner, pmlearner, palearner
+    return qlearner, ratiolearner, pmlearner, palearner
 
 def opeuc_run(s0, iid_dataset, target_policy, time_difference=None, gamma=0.9,
               palearner_setting={'discrete_state': False, 'rbf_dim': None, 'cv_score': 'accuracy', 'verbose': True},
@@ -602,7 +621,7 @@ def opeuc_run(s0, iid_dataset, target_policy, time_difference=None, gamma=0.9,
               ratiolearner_setting={'mode': 'linear', 'rbf_ndims': None,
                                     'batch_size': 32, 'epoch': 100, 'lr': 0.01, 'verbose': True},
               new_iid_dataset=None, matrix_based_ope=True):
-    qlearner, rationearner, pmlearner, palearner = nuisance_estimate_uc(
+    qlearner, ratiolearner, pmlearner, palearner = nuisance_estimate_uc(
         s0, iid_dataset, target_policy, time_difference, gamma, palearner_setting, pmlearner_setting, qlearner_setting, ratiolearner_setting)
     if new_iid_dataset is None:
         np.random.seed(1)
@@ -624,10 +643,10 @@ def opeuc_run(s0, iid_dataset, target_policy, time_difference=None, gamma=0.9,
                    'policy_action_next': target_action_next,
                    'mediator': iid_dataset[2], 'reward': iid_dataset[3],
                    'next_state': iid_dataset[4]}
-        opeuc = OPEUC(dataset, qlearner, rationearner,
+        opeuc = OPEUC(dataset, qlearner, ratiolearner,
                       pmlearner, palearner, time_difference, gamma, matrix_based_ope, target_policy)
     else:
-        opeuc = OPEUC(new_iid_dataset, qlearner, rationearner,
+        opeuc = OPEUC(new_iid_dataset, qlearner, ratiolearner,
                       pmlearner, palearner, time_difference, gamma, matrix_based_ope, target_policy)
     opeuc.compute_opeuc()
     return opeuc
@@ -673,7 +692,7 @@ def opeuc_cross_fit(s0, iid_dataset, target_policy, nfold=2, gamma=0.9,
                          np.copy(iid_dataset[2])[part_iid_index],
                          np.copy(iid_dataset[3])[part_iid_index], 
                          np.copy(iid_dataset[4])[part_iid_index, :]]
-        # qlearner, rationearner, pmlearner, palearner = nuisance_estimate_uc(
+        # qlearner, ratiolearner, pmlearner, palearner = nuisance_estimate_uc(
             # part_s0, part_iid_data, target_policy, gamma, palearner_setting, pmlearner_setting, qlearner_setting, ratiolearner_setting)
 
         target_action = np.apply_along_axis(target_policy, 1, iid_dataset[0]).flatten()
