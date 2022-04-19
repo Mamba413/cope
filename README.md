@@ -28,12 +28,14 @@ Utilities:
 - `utilize_prototypemodel.py`: helpful classes for simulations
 
 Numerical experiments:
+
+(See ACC form detailed for instructions)
+
 - `sim_robust.py`: simulation for demonstrating double robustness
 - `sim_time_compare.py` & `sim_time_compare_multdim.py`: simulation when time points vary
 - `sim_trajectory_compare.py` & `sim_trajectory_compare_multdim.py`: simulation when the number of trajectories vary
 - `sim_ratiolearner_compare.py`
 - `sim_ratio_features_number_compare.py`
-(See ACC form detailed for instructions)
 
 ## Citations
 
