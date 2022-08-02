@@ -1,7 +1,7 @@
 
-# Off-Policy Interval Estimation with Confounded Markov Decision Process
+# Off-Policy Interval Estimation with Confounded Markov Decision Process (COPE)
 
-This repository contains the implementation for the paper "Off-Policy Interval Estimation with Confounded Markov Decision Process" in Python.
+This repository contains the implementation for the paper "Off-Policy Interval Estimation with Confounded Markov Decision Process" (JASA, 2022+) in Python.
 
 ## Requirements
 Change your working directory to this main folder, run `conda env create --file COPE.yml` to create the Conda environment, 
