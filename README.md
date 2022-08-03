@@ -1,7 +1,15 @@
 
-# Off-Policy Interval Estimation with Confounded Markov Decision Process
+# Off-Policy Interval Estimation with Confounded Markov Decision Process (COPE)
 
-This repository contains the implementation for the paper "Off-Policy Interval Estimation with Confounded Markov Decision Process" in Python.
+This repository contains the implementation for the paper "[Off-Policy Interval Estimation with Confounded Markov Decision Process](https://arxiv.org/pdf/2202.10589.pdf)" (JASA, 2022+) in Python.
+
+## Summary of the Paper
+
+This paper is concerned with constructing a confidence interval for a target policy's value offline based on a pre-collected observational data in infinite horizon settings. Most of the existing works assume no unmeasured variables exist that confound the observed actions. This assumption, however, is likely to be violated in real applications such as healthcare and technological industries. In this paper, we show that with some auxiliary variables that mediate the effect of actions on the system dynamics, the target policy’s value is identifiable in a confounded Markov decision process. Based on this result, we develop an efficient off-policy value estimator that is robust to potential model misspecification and provide rigorous uncertainty quantification. Our method is justified by theoretical results, simulated and real datasets obtained from ridesharing companies.
+
+<img align="center" src="CausalDiagram.png" alt="drawing" width="700">
+
+**Figure 1**: Causal diagrams for MDP, confounded MDP and confounded MDP with mediators (the focus of this paper). 
 
 ## Requirements
 Change your working directory to this main folder, run `conda env create --file COPE.yml` to create the Conda environment, 
