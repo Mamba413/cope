@@ -49,14 +49,16 @@ Numerical experiments:
 
 Please cite the following publications if you make use of the material here. 
 
-- Chengchun Shi, Jin Zhu, Ye Shen, Shikai Luo, Hongtu Zhu, Rui Song (2022). Off-Policy Confidence Interval Estimation with Confounded Markov Decision Process. aarXiv preprint arXiv:2202.10589, 2022.
+- Shi, C., Zhu, J., Ye, S., Luo, S., Zhu, H., & Song, R. (2022). Off-policy confidence interval estimation with confounded Markov decision process. Journal of the American Statistical Association, accepted.
 
 ```
-@article{zhang2021certifiably,
-  title = {Off-Policy Confidence Interval Estimation with Confounded Markov Decision Process},
-  author = {Chengchun Shi, Jin Zhu, Ye Shen, Shikai Luo, Hongtu Zhu, Rui Song},
-  journal = {arXiv preprint arXiv:2202.10589},
-  year = {2022}
+@article{shi2022off,
+  title={Off-policy confidence interval estimation with confounded Markov decision process},
+  author={Shi, Chengchun and Zhu, Jin and Ye, Shen and Luo, Shikai and Zhu, Hongtu and Song, Rui},
+  journal={Journal of the American Statistical Association},
+  volume={accepted},
+  year={2022},
+  publisher={Taylor \& Francis}
 }
 ```
 
