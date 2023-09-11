@@ -1,7 +1,7 @@
 
 # Off-Policy Interval Estimation with Confounded Markov Decision Process (COPE)
 
-This repository contains the implementation for the paper "[Off-Policy Interval Estimation with Confounded Markov Decision Process](https://arxiv.org/pdf/2202.10589.pdf)" (JASA, 2022+) in Python.
+This repository contains the implementation for the paper "[Off-Policy Confidence Interval Estimation with Confounded Markov Decision Process](https://arxiv.org/pdf/2202.10589.pdf)" (JASA, 2022) in Python.
 
 ## Summary of the Paper
 
