@@ -20,3 +20,4 @@ verify_problearner.py
 verify_qlearner.py
 verify_ratio.py
 sim_policy_diff.py
+.DS_Store
