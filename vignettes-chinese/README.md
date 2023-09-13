@@ -66,7 +66,9 @@ $$\eta^\pi = E\left[ \sum_{t=0}^{\infty}\gamma^tE^\pi(R_t|S_0) \right],$$
 
 其中，前者保证了给定 $S_t$, $t$ 时刻之前的变量 $\{S_j, U_j, A_j, M_j, R_j\}_{j<t}$ 与 $t$ 时刻的变量 $U_t, A_t, M_t, R_t$ 独立。因此，问题可以被简化为研究给定 $S_t$ 的设定下，$t$ 时刻策略 $\pi$ 带来的收益 $R_t$。进一步，在 $t$ 时刻，我们可以利用前门准则原理导出仅依赖于观测数据潜在分布的表达式。
 
-![Alt text](image-2.png)
+<div  align="center">    
+<img src="image-2.png" width = "360"/>
+</div>
 
 ### 双重稳健区间估计
 
